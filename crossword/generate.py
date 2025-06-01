@@ -2,7 +2,6 @@ import sys
 
 from crossword import *
 
-
 class CrosswordCreator():
 
     def __init__(self, crossword):
@@ -104,7 +103,6 @@ class CrosswordCreator():
             for x in self.domains[var].copy():
                 if len(x) != var.length:
                     self.domains[var].remove(x) 
-        
 
     def revise(self, x, y):
         """
@@ -123,7 +121,6 @@ class CrosswordCreator():
                     self.domains[x].remove(x_value)
                     revised = True
         return revised
-
 
     def ac3(self, arcs=None):
         """
@@ -152,14 +149,27 @@ class CrosswordCreator():
         Return True if `assignment` is complete (i.e., assigns a value to each
         crossword variable); return False otherwise.
         """
-        raise NotImplementedError
+        return all([var in assignment.keys() and assignment[var] is not None for var in self.crossword.variables])
 
     def consistent(self, assignment):
         """
         Return True if `assignment` is consistent (i.e., words fit in crossword
         puzzle without conflicting characters); return False otherwise.
         """
-        raise NotImplementedError
+        # all values are distinct ?
+        if len(assignment.values()) != len(set(assignment.values())):
+            return False
+        # every value is the correct length ?
+        if not all([len(assignment[var]) == var.length for var in assignment.keys()]):
+            return False
+        # there are no conflicts between neighboring variables ?
+        for x in assignment.keys():
+            for n in self.crossword.neighbors(x):
+                if n in assignment.keys():
+                    i, j = self.crossword.overlaps[x, n]
+                    if assignment[x][i] != assignment[n][j]:
+                        return False
+        return True
 
     def order_domain_values(self, var, assignment):
         """
@@ -168,7 +178,22 @@ class CrosswordCreator():
         The first value in the list, for example, should be the one
         that rules out the fewest values among the neighbors of `var`.
         """
-        raise NotImplementedError
+
+        def compute_constraining_values(self, var, value, assignment):
+            n = 0
+            for unassigned_neighbor in [item for item in self.crossword.neighbors(var) if item not in assignment.keys()]:
+                if self.crossword.overlaps[var, unassigned_neighbor]:
+                    i, j = self.crossword.overlaps[var, unassigned_neighbor]
+                    for unassigned_neighbor_value in self.domains[unassigned_neighbor]:
+                        if value[i] != unassigned_neighbor_value[j]:
+                            n += 1
+            return n
+        
+        values = [value for value in self.domains[var]]
+        constraining_values = {value: compute_constraining_values(self, var, value, assignment) 
+                               for value in self.domains[var]}
+        
+        return sorted(values, key=constraining_values.__getitem__)
 
     def select_unassigned_variable(self, assignment):
         """
@@ -178,7 +203,28 @@ class CrosswordCreator():
         degree. If there is a tie, any of the tied variables are acceptable
         return values.
         """
-        raise NotImplementedError
+        def compute_remaining_values(self, unassigned_variables):
+            remaining_values= {}
+            for var in unassigned_variables:
+                remaining_values[var] = len(self.domains[var])
+            return remaining_values
+        
+        def compute_degrees(self, unassigned_variables):
+            degrees = {}
+            for var in unassigned_variables:
+                degrees[var] = len(self.crossword.neighbors(var))
+            return degrees
+        
+        unassigned_variables = [item for item in self.crossword.variables if item not in assignment.keys()]
+        remaining_values = compute_remaining_values(self, unassigned_variables)
+        min_remaining_values = [var for var in remaining_values.keys() if remaining_values[var] == min(remaining_values.values())]
+
+        if len(min_remaining_values) == 1:
+            return min_remaining_values[0]
+        
+        degrees = compute_degrees(self, min_remaining_values)
+        highest_degrees = [var for var in degrees.keys() if degrees[var] == min(degrees.values())]
+        return highest_degrees[0]
 
     def backtrack(self, assignment):
         """
@@ -189,8 +235,22 @@ class CrosswordCreator():
 
         If no assignment is possible, return None.
         """
-        raise NotImplementedError
 
+        if self.assignment_complete(assignment):
+            return assignment
+        
+        var = self.select_unassigned_variable(assignment)
+
+        for value in self.order_domain_values(var, assignment):
+            temp_assignment = assignment.copy()
+            temp_assignment[var] = value
+            if self.consistent(temp_assignment):
+                assignment[var] = value
+                result = self.backtrack(assignment)
+                if result is not None:
+                    return result
+                assignment.pop(var)
+        return None
 
 def main():
 
