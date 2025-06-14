@@ -79,29 +79,126 @@ def get_model():
     `input_shape` of the first layer is `(IMG_WIDTH, IMG_HEIGHT, 3)`.
     The output layer should have `NUM_CATEGORIES` units, one for each category.
     """
-    model = tf.keras.models.Sequential()
-    # C1
-    model.add(tf.keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=(IMG_WIDTH, IMG_HEIGHT, 3), padding='same'))
-    # S2
-    model.add(tf.keras.layers.MaxPooling2D((2, 2), padding='valid'))
+    models = {
+        0 : tf.keras.models.Sequential([
+            # C1
+            tf.keras.layers.Conv2D(128, (3, 3), activation='relu', input_shape=(IMG_WIDTH, IMG_HEIGHT, 3), padding='same'),
+            # S2
+            tf.keras.layers.MaxPooling2D((2, 2), padding='valid'),
+            tf.keras.layers.Flatten(),
+            # F3
+            tf.keras.layers.Dense(NUM_CATEGORIES, activation='softmax')
+        ]),
 
-    # C3
-    model.add(tf.keras.layers.Conv2D(64, (3, 3), activation='relu', padding='same'))
-    # S4
-    model.add(tf.keras.layers.MaxPooling2D((2, 2), padding='valid'))
+        1 : tf.keras.models.Sequential([
+            # C1
+            tf.keras.layers.Conv2D(64, (3, 3), activation='relu', input_shape=(IMG_WIDTH, IMG_HEIGHT, 3), padding='same'),
+            # S2
+            tf.keras.layers.MaxPooling2D((2, 2), padding='valid'),
+            tf.keras.layers.Flatten(),
+            # F3
+            tf.keras.layers.Dense(NUM_CATEGORIES, activation='softmax')
+        ]),
 
-    # C5
-    model.add(tf.keras.layers.Conv2D(128, (3, 3), activation='relu', padding='same'))
-    # S6
-    model.add(tf.keras.layers.MaxPooling2D((2, 2), padding='valid'))
+        2 : tf.keras.models.Sequential([
+            # C1
+            tf.keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=(IMG_WIDTH, IMG_HEIGHT, 3), padding='same'),
+            # S2
+            tf.keras.layers.MaxPooling2D((2, 2), padding='valid'),
+            tf.keras.layers.Flatten(),
+            # F3
+            tf.keras.layers.Dense(NUM_CATEGORIES, activation='softmax')
+        ]),
 
-    model.add(tf.keras.layers.Flatten())
-    # F7
-    model.add(tf.keras.layers.Dense(256, activation='relu'))
-    model.add(tf.keras.layers.Dropout(0.5))
-    # F8
-    model.add(tf.keras.layers.Dense(NUM_CATEGORIES, activation='softmax'))
+        3 : tf.keras.models.Sequential([
+            tf.keras.layers.Conv2D(128, (3, 3), activation='relu', input_shape=(IMG_WIDTH, IMG_HEIGHT, 3), padding='same'),
+            tf.keras.layers.MaxPooling2D((2, 2), padding='valid'),
+            tf.keras.layers.Flatten(),
+            tf.keras.layers.Dense(64, activation='relu'),
+            tf.keras.layers.Dense(NUM_CATEGORIES, activation='softmax')
+        ]),
 
+        4 : tf.keras.models.Sequential([
+            tf.keras.layers.Conv2D(64, (3, 3), activation='relu', input_shape=(IMG_WIDTH, IMG_HEIGHT, 3), padding='same'),
+            tf.keras.layers.MaxPooling2D((2, 2), padding='valid'),
+            tf.keras.layers.Flatten(),
+            tf.keras.layers.Dense(64, activation='relu'),
+            tf.keras.layers.Dropout(0.5),
+            tf.keras.layers.Dense(NUM_CATEGORIES, activation='softmax')
+        ]),
+
+        5 : tf.keras.models.Sequential([
+            tf.keras.layers.Conv2D(64, (3, 3), activation='relu', input_shape=(IMG_WIDTH, IMG_HEIGHT, 3), padding='same'),
+            tf.keras.layers.MaxPooling2D((2, 2), padding='valid'),
+            tf.keras.layers.Flatten(),
+            tf.keras.layers.Dense(128, activation='relu'),
+            tf.keras.layers.Dropout(0.5),
+            tf.keras.layers.Dense(NUM_CATEGORIES, activation='softmax')
+        ]),
+
+        6 : tf.keras.models.Sequential([
+            tf.keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=(IMG_WIDTH, IMG_HEIGHT, 3), padding='same'),
+            tf.keras.layers.MaxPooling2D((2, 2), padding='valid'),
+            tf.keras.layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
+            tf.keras.layers.MaxPooling2D((2, 2), padding='valid'),
+            tf.keras.layers.Flatten(),
+            tf.keras.layers.Dense(128, activation='relu'),
+            tf.keras.layers.Dropout(0.5),
+            tf.keras.layers.Dense(NUM_CATEGORIES, activation='softmax')
+        ]),
+
+        7 : tf.keras.models.Sequential([
+            # C1
+            tf.keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=(IMG_WIDTH, IMG_HEIGHT, 3), padding='same'),
+            # S2
+            tf.keras.layers.MaxPooling2D((2, 2), padding='valid'),
+
+            # C3
+            tf.keras.layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
+            # S4
+            tf.keras.layers.MaxPooling2D((2, 2), padding='valid'),
+
+            # C5
+            tf.keras.layers.Conv2D(128, (3, 3), activation='relu', padding='same'),
+            # S6
+            tf.keras.layers.MaxPooling2D((2, 2), padding='valid'),
+
+            tf.keras.layers.Flatten(),
+            # F7
+            tf.keras.layers.Dense(256, activation='relu'),
+            tf.keras.layers.Dropout(0.5),
+            # F8
+            tf.keras.layers.Dense(NUM_CATEGORIES, activation='softmax')
+        ]),  
+
+        8 : tf.keras.models.Sequential([
+            # C1
+            tf.keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=(IMG_WIDTH, IMG_HEIGHT, 3), padding='same'),
+            # S2
+            tf.keras.layers.MaxPooling2D((2, 2), padding='valid'),
+
+            # C3
+            tf.keras.layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
+            # S4
+            tf.keras.layers.MaxPooling2D((2, 2), padding='valid'),
+
+            # C5
+            tf.keras.layers.Conv2D(64, (3, 3), activation='relu', padding='same'),
+            # S6
+            tf.keras.layers.MaxPooling2D((2, 2), padding='valid'),
+
+            tf.keras.layers.Flatten(),
+            # F7
+            tf.keras.layers.Dense(128, activation='relu'),
+            tf.keras.layers.Dropout(0.5),
+            # F8
+            tf.keras.layers.Dense(NUM_CATEGORIES, activation='softmax')
+        ])
+    }
+
+    # Select the best model
+    model = models[7]
+    
     model.compile(optimizer='adam',
               loss=tf.keras.losses.CategoricalCrossentropy(),
               metrics=['accuracy'])
